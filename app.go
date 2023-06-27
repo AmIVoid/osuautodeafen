@@ -67,6 +67,7 @@ type GoSuMemory struct {
 type GeneralSettings struct {
 	Name                         string `ini:"username"`
 	StartGosuMemoryAutomatically bool   `ini:"startgosumemory"`
+	Keybind                      string `ini:"keybind"`
 }
 
 type GameplaySettings struct {
@@ -86,6 +87,76 @@ var recentlyjoined = false
 var alreadyDetectedRestart = false
 var inbeatmap = false
 var misses float64 = 0
+
+var KbMap = map[string][]int{
+	// numbers
+	"1": {keybd_event.VK_1},
+	"2": {keybd_event.VK_2},
+	"3": {keybd_event.VK_3},
+	"4": {keybd_event.VK_4},
+	"5": {keybd_event.VK_5},
+	"6": {keybd_event.VK_6},
+	"7": {keybd_event.VK_7},
+	"8": {keybd_event.VK_8},
+	"9": {keybd_event.VK_9},
+	"0": {keybd_event.VK_0},
+
+	// uppercase
+	"Q": {keybd_event.VK_Q},
+	"W": {keybd_event.VK_W},
+	"E": {keybd_event.VK_E},
+	"R": {keybd_event.VK_R},
+	"T": {keybd_event.VK_T},
+	"Y": {keybd_event.VK_Y},
+	"U": {keybd_event.VK_U},
+	"I": {keybd_event.VK_I},
+	"O": {keybd_event.VK_O},
+	"P": {keybd_event.VK_P},
+	"A": {keybd_event.VK_A},
+	"S": {keybd_event.VK_S},
+	"D": {keybd_event.VK_D},
+	"F": {keybd_event.VK_F},
+	"G": {keybd_event.VK_G},
+	"H": {keybd_event.VK_H},
+	"J": {keybd_event.VK_J},
+	"K": {keybd_event.VK_K},
+	"L": {keybd_event.VK_L},
+	"Z": {keybd_event.VK_Z},
+	"X": {keybd_event.VK_X},
+	"C": {keybd_event.VK_C},
+	"V": {keybd_event.VK_V},
+	"B": {keybd_event.VK_B},
+	"N": {keybd_event.VK_N},
+	"M": {keybd_event.VK_M},
+
+	// lowercase
+	"q": {keybd_event.VK_Q},
+	"w": {keybd_event.VK_W},
+	"e": {keybd_event.VK_E},
+	"r": {keybd_event.VK_R},
+	"t": {keybd_event.VK_T},
+	"y": {keybd_event.VK_Y},
+	"u": {keybd_event.VK_U},
+	"i": {keybd_event.VK_I},
+	"o": {keybd_event.VK_O},
+	"p": {keybd_event.VK_P},
+	"a": {keybd_event.VK_A},
+	"s": {keybd_event.VK_S},
+	"d": {keybd_event.VK_D},
+	"f": {keybd_event.VK_F},
+	"g": {keybd_event.VK_G},
+	"h": {keybd_event.VK_H},
+	"j": {keybd_event.VK_J},
+	"k": {keybd_event.VK_K},
+	"l": {keybd_event.VK_L},
+	"z": {keybd_event.VK_Z},
+	"x": {keybd_event.VK_X},
+	"c": {keybd_event.VK_C},
+	"v": {keybd_event.VK_V},
+	"b": {keybd_event.VK_B},
+	"n": {keybd_event.VK_N},
+	"m": {keybd_event.VK_M},
+}
 
 // true for deafen
 // false for undeafen
@@ -115,7 +186,7 @@ func loadConfig() Settings {
 	if err != nil {
 		fmt.Println("[!!] No config.ini found! Creating a config.ini...")
 		out, _ := os.Create("config.ini")
-		resp, err := http.Get("https://raw.githubusercontent.com/nat3z/osuautodeafen/master/config.ini.temp")
+		resp, err := http.Get("https://raw.githubusercontent.com/amivoid/osuautodeafen/master/config.ini.temp")
 		if err != nil {
 			fmt.Println("[!!] Unable to get template for osuautodeafen. Please connect to the internet and try again later.")
 			os.Exit(1)
@@ -159,17 +230,19 @@ func main() {
 		time.Sleep(2 * time.Second)
 	}
 
-	deafenKeybind := "alt+d"
+	deafenKeybind := config.General.Keybind
 	kb, err := keybd_event.NewKeyBonding()
 
 	if err != nil {
 		panic(err)
 	}
+
 	// Select keys to be pressed
-	kb.SetKeys(keybd_event.VK_D)
+	vks := KbMap[string(deafenKeybind)]
+	kb.SetKeys(vks...)
 	kb.HasALT(true)
 
-	fmt.Printf("[!] Deafen keybind will be %s. Please make sure that your deafen keybind is set to this.\n", deafenKeybind)
+	fmt.Printf("[!] Deafen keybind will be alt+%s. Please make sure that your deafen keybind is set to this.\n", deafenKeybind)
 
 	urlParsed := url.URL{Scheme: "ws", Host: addr, Path: "/ws"}
 	ws, _, err := websocket.DefaultDialer.Dial(urlParsed.String(), nil)

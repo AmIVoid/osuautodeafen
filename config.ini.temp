@@ -1,6 +1,7 @@
 [general]
 username = "my_osu_username"
 startgosumemory = true
+keybind = "key"
 
 [gameplay]
 deafenpercent = 0.5
