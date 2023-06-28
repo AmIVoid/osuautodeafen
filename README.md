@@ -16,6 +16,7 @@ Powered by the popular tool, [GosuMemory](https://github.com/l3lackShark/gosumem
 TO-DO:
 - [x] Customizable bind
 - [ ] Customizable mod key
+- [ ] Alternate Keybind when FCing (For Shift+Tab or something)
 - [ ] GUI
 - [ ] Keybind to clip after FC?
 
