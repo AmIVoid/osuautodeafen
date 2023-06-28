@@ -6,3 +6,6 @@ keybind = "key"
 [gameplay]
 deafenpercent = 0.5
 undeafenmiss = 1
+scoretoggle = false
+uitoggle = false
+clipfc = false

@@ -14,11 +14,12 @@ Powered by the popular tool, [GosuMemory](https://github.com/l3lackShark/gosumem
 > Please know that osu! Auto Deafen is still in development. Whenever we make major changes, you may need to manually update your config.ini
 
 TO-DO:
+- [ ] Deafen even if not FCing
 - [x] Customizable bind
 - [ ] Customizable mod key
-- [ ] Alternate Keybind when FCing (For Shift+Tab or something)
+- [x] ~~Alternate Keybind when FCing (For Shift+Tab or something)~~ Make better (Auto retab at beatmap start etc.)
 - [ ] GUI
-- [ ] Keybind to clip after FC?
+- [x] ~~Keybind to clip after FC~~ Change clip keybind
 
 # This project uses:
 * [gorilla-websocket](https://github.com/gorilla/websocket)

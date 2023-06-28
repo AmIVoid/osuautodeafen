@@ -73,7 +73,11 @@ type GeneralSettings struct {
 type GameplaySettings struct {
 	DeafenPercent       float64 `ini:"deafenpercent"`
 	UndeafenAfterMisses float64 `ini:"undeafenmiss"`
+	ToggleScoreboard    bool    `ini:"scoretoggle"`
+	ToggleUI            bool    `ini:"uitoggle"`
+	ClipFC              bool    `ini:"clipfc"`
 }
+
 type Settings struct {
 	Gameplay GameplaySettings `ini:"gameplay"`
 	General  GeneralSettings  `ini:"general"`
@@ -81,6 +85,7 @@ type Settings struct {
 
 var addr = "localhost:24050"
 var alreadyDeafened = false
+var alreadyHidden = false
 
 var state int = 0
 var recentlyjoined = false
@@ -195,6 +200,65 @@ func deafenOrUndeafen(kb keybd_event.KeyBonding, expect bool) {
 	alreadyDeafened = !alreadyDeafened
 }
 
+func toggleUI(uiToggle keybd_event.KeyBonding, expect bool) {
+
+	uiToggle.SetKeys(keybd_event.VK_TAB)
+	uiToggle.HasSHIFT(true)
+
+	if loadConfig().Gameplay.ToggleUI == false {
+
+	} else {
+		if alreadyHidden {
+			if expect {
+				return
+			}
+			fmt.Println("| [KP] Toggle UI On")
+			uiToggle.Press()
+			time.Sleep(10 * time.Millisecond)
+			uiToggle.Release()
+		} else {
+			if !expect {
+				return
+			}
+			fmt.Println("| [KP] Toggle UI Off")
+			uiToggle.Press()
+			time.Sleep(10 * time.Millisecond)
+			uiToggle.Release()
+		}
+		alreadyHidden = !alreadyHidden
+	}
+
+}
+
+func toggleScore(scoreToggle keybd_event.KeyBonding) {
+
+	scoreToggle.SetKeys(keybd_event.VK_TAB)
+
+	if loadConfig().Gameplay.ToggleScoreboard == false {
+	} else {
+		fmt.Println("| [KP] Toggling scoreboard")
+		scoreToggle.Press()
+		time.Sleep(10 * time.Millisecond)
+		scoreToggle.Release()
+	}
+
+}
+
+func clipFC(clipKeybind keybd_event.KeyBonding) {
+
+	clipKeybind.SetKeys(keybd_event.VK_HOME)
+	clipKeybind.HasALT(true)
+
+	if loadConfig().Gameplay.ClipFC == false {
+	} else {
+		fmt.Println("| [KP] Clipping play")
+		clipKeybind.Press()
+		time.Sleep(10 * time.Millisecond)
+		clipKeybind.Release()
+	}
+
+}
+
 func loadConfig() Settings {
 	cfg, err := ini.Load("config.ini")
 	if err != nil {
@@ -246,6 +310,9 @@ func main() {
 
 	deafenKeybind := config.General.Keybind
 	kb, err := keybd_event.NewKeyBonding()
+	uiToggle, err := keybd_event.NewKeyBonding()
+	scoreToggle, err := keybd_event.NewKeyBonding()
+	clipKeybind, err := keybd_event.NewKeyBonding()
 
 	if err != nil {
 		panic(err)
@@ -309,6 +376,7 @@ func main() {
 				if misses >= config.Gameplay.UndeafenAfterMisses && alreadyDeafened {
 					fmt.Printf("| Missed too many times (%sx) for undeafen. Now undeafening..\n", fmt.Sprint(config.Gameplay.UndeafenAfterMisses))
 					deafenOrUndeafen(kb, false)
+					toggleUI(uiToggle, false)
 				}
 
 				if gosuResponse.Gameplay.Score == 0 && gosuResponse.Gameplay.Accuracy == 0 && gosuResponse.Gameplay.Combo.Current == 0 && !recentlyjoined && !alreadyDetectedRestart {
@@ -316,9 +384,12 @@ func main() {
 					misses = 0
 					alreadyDetectedRestart = true
 					deafenOrUndeafen(kb, false)
+					toggleUI(uiToggle, false)
 				} else if math.Floor(gosuResponse.Menu.BM.Stats.MaxCombo*config.Gameplay.DeafenPercent) < gosuResponse.Gameplay.Combo.Current && !alreadyDeafened && inbeatmap && misses == 0 {
 					fmt.Println("| Reached max combo treshold for map. Now deafening..")
 					deafenOrUndeafen(kb, true)
+					toggleUI(uiToggle, true)
+					toggleScore(scoreToggle)
 				}
 			}
 
@@ -327,6 +398,11 @@ func main() {
 				inbeatmap = true
 				recentlyjoined = true
 			} else if state == 2 && gosuResponse.Menu.State != 2 && inbeatmap {
+
+				if misses == 0 && gosuResponse.Menu.State == 7 {
+					clipFC(clipKeybind)
+				}
+
 				fmt.Println("[#] Detected Beatmap Exit")
 				inbeatmap = false
 				misses = 0
