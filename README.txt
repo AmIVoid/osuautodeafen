@@ -16,9 +16,14 @@ running the program.
 - Syntax rules for config.ini:
 -- Make sure that usernames, words, etc. are within the quotation marks. ("") 
 -- To turn a setting off/on, use true (on) and false (off). Keep in mind that these are case sensitive, and should ALWAYS be lowercase.
+-- Keybind currently only supports 1 key. Choose which key to press along with ALT.
 
 If everything goes right, in the console, you should see "Connected to GosuMemory. Make sure that it stays on when playing osu!"
 Once you see this message, you are connected to osu! and are free to play any beatmap with autodeafen enabled!
 
-Remember to set your deafen keybind on Discord to ALT+D, as this is the key combination that will be pressed when osu! Auto Deafen
+If the program closes once it opens, unzip the gosumemory.zip in deps and move the .exe into the deps folder.
+
+Remember to set your deafen keybind on Discord to ALT+Keybind, as this is the key combination that will be pressed when osu! Auto Deafen
 is ready to deafen.
+
+Keys supported are all letters, numbers and function keys.

@@ -89,6 +89,20 @@ var inbeatmap = false
 var misses float64 = 0
 
 var KbMap = map[string][]int{
+	// function keys
+	"F1":  {keybd_event.VK_F1},
+	"F2":  {keybd_event.VK_F2},
+	"F3":  {keybd_event.VK_F3},
+	"F4":  {keybd_event.VK_F4},
+	"F5":  {keybd_event.VK_F5},
+	"F6":  {keybd_event.VK_F6},
+	"F7":  {keybd_event.VK_F7},
+	"F8":  {keybd_event.VK_F8},
+	"F9":  {keybd_event.VK_F9},
+	"F10": {keybd_event.VK_F10},
+	"F11": {keybd_event.VK_F11},
+	"F12": {keybd_event.VK_F12},
+
 	// numbers
 	"1": {keybd_event.VK_1},
 	"2": {keybd_event.VK_2},
@@ -242,7 +256,7 @@ func main() {
 	kb.SetKeys(vks...)
 	kb.HasALT(true)
 
-	fmt.Printf("[!] Deafen keybind will be alt+%s. Please make sure that your deafen keybind is set to this.\n", deafenKeybind)
+	fmt.Printf("[!] Deafen keybind will be ALT+%s. Please make sure that your deafen keybind is set to this.\n", deafenKeybind)
 
 	urlParsed := url.URL{Scheme: "ws", Host: addr, Path: "/ws"}
 	ws, _, err := websocket.DefaultDialer.Dial(urlParsed.String(), nil)
