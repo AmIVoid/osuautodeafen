@@ -1,9 +1,9 @@
 ![banner](./assets/osuautodeafen-banner.png)
 
-Powered by the popular tool, [GosuMemory](https://github.com/l3lackShark/gosumemory/), osu! Auto Deafen gives users an easy-to-use system for auto deafening you on Discord whenever you're about to FC a map.
+Powered by the popular tool, [GosuMemory](https://github.com/KotRikD/tosu), osu! Auto Deafen gives users an easy-to-use system for auto deafening you on Discord whenever you're about to FC a map.
 
 # Installation Steps
-1. Download the [latest release](https://github.com/Nat3z/osuautodeafen/releases/latest) and unzip it.
+1. Download the [latest release](https://github.com/daftuyda/osuautodeafen/releases/latest) and unzip it.
 1. Set your Discord Deafen keybind to ALT+D
 1. Launch osu! 
 1. After osu! has fully loaded, launch "osuautodeafen.exe" and wait for it to start.
@@ -11,8 +11,8 @@ Powered by the popular tool, [GosuMemory](https://github.com/l3lackShark/gosumem
 1. Relaunch "osuautodeafen.exe"
 1. You're all set!
 
-> Please know that osu! Auto Deafen is still in development. Whenever we make major changes, you may need to manually update your config.ini
+> Please know that osu! Auto Deafen is still in development. Whenever we make major changes, you may need to manually update your config
 
 # This project uses:
 * [gorilla-websocket](https://github.com/gorilla/websocket)
-* [gosumemory](ttps://github.com/l3lackShark/gosumemory/)
+* [gosumemory](ttps://github.com/KotRikD/tosu)
