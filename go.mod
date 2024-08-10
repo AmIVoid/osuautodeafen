@@ -1,4 +1,4 @@
-module github.com/Nat3z/osudeafen
+module github.com/daftuyda/osuautodeafen
 
 go 1.19
 

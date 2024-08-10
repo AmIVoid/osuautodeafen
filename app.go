@@ -139,7 +139,7 @@ func main() {
 
 	// if start tosu automatically is on, then start process
 	cmnd := exec.Command("./deps/tosu.exe")
-	if config.General.StartTosuMemoryAutomatically {
+	if config.General.StartTosuAutomatically {
 		fmt.Printf("[#] Starting TosuMemory... \n")
 		cmnd.Start()
 		time.Sleep(4 * time.Second)

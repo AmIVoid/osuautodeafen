@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-var version = "v1.4"
+var version = "v1.3"
 
 type ReleaseAsset struct {
 	BrowserDownloadURL string `json:"browser_download_url"`

@@ -241,7 +241,7 @@ func CreateWindow(settings Settings, isFirstLoad bool) {
 
 	// Create window
 	w, err := a.NewWindow("./resources/app/index.html", &astilectron.WindowOptions{
-		Height:      astikit.IntPtr(205),
+		Height:      astikit.IntPtr(225),
 		Width:       astikit.IntPtr(195),
 		AlwaysOnTop: astikit.BoolPtr(true),
 		Transparent: astikit.BoolPtr(true),
