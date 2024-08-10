@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-var version = "v1.0"
+var version = "v1.4"
 
 type ReleaseAsset struct {
 	BrowserDownloadURL string `json:"browser_download_url"`
@@ -23,8 +23,8 @@ type Releases struct {
 	Error   string         `json:"error"`
 }
 
-func CheckVersionGosu() bool {
-	resp, err := http.Get("https://api.github.com/repos/l3lackShark/gosumemory/releases/latest")
+func CheckVersionTosu() bool {
+	resp, err := http.Get("https://api.github.com/repos/KotRikD/tosu/releases/latest")
 	if err != nil {
 		fmt.Println("[!!] Error occurred when checking for updates")
 		return false
@@ -36,7 +36,7 @@ func CheckVersionGosu() bool {
 	json.Unmarshal(bodyEncoded, &releases)
 	var downloadLink = ""
 	for _, release := range releases.Assets {
-		if strings.Contains(release.Name, "gosumemory_windows_") && !strings.Contains(release.Name, "amd") {
+		if strings.Contains(release.Name, "tosu-windows") {
 			downloadLink = release.BrowserDownloadURL
 			break
 		}
@@ -56,23 +56,23 @@ func CheckVersionGosu() bool {
 		}
 		releaseVersion = ""
 		defer out.Close()
-		// downloadGosuMemory(downloadLink)
+		// downloadTosu(downloadLink)
 	} else {
 		version, _ := os.ReadFile("./deps/version.txt")
 		releaseVersion = string(version)
 	}
 
 	if releaseVersion == releases.TagName {
-		fmt.Printf("[#] Up-to-date with gosumemory repo.\n")
+		fmt.Printf("[#] Up-to-date with tosu repo.\n")
 		return true
 	}
 
-	var depserror = os.Remove("./deps/gosumemory.exe")
+	var depserror = os.Remove("./deps/tosu.exe")
 	if depserror != nil {
-		fmt.Println("[+] Preparing for clean install of gosumemory.exe")
+		fmt.Println("[+] Preparing for clean install of tosu.exe")
 		fmt.Println("[++] ", depserror)
 	}
-	DownloadGosuMemory(downloadLink)
+	DownloadTosu(downloadLink)
 	out, _ := os.Create("./deps/version.txt")
 	out.WriteString(releases.TagName)
 	defer out.Close()
@@ -81,7 +81,7 @@ func CheckVersionGosu() bool {
 }
 
 func CheckVersion() bool {
-	resp, err := http.Get("https://api.github.com/repos/Nat3z/osuautodeafen/releases/latest")
+	resp, err := http.Get("https://api.github.com/repos/daftuyda/osuautodeafen/releases/latest")
 	if err != nil {
 		fmt.Println("[!!] Error occurred when checking for updates.")
 		return false
@@ -100,29 +100,29 @@ func CheckVersion() bool {
 		fmt.Printf("[#] Up-to-date with osu! Auto Deafen.\n")
 	} else {
 		fmt.Println("======================\n   osu! Auto Deafen\n   UPDATE AVAILABLE\n======================")
-		fmt.Printf("VERSION %s: https://github.com/Nat3z/osuautodeafen/releases/latest\n", releases.TagName)
+		fmt.Printf("VERSION %s: https://github.com/daftuyda/osuautodeafen/releases/latest\n", releases.TagName)
 	}
 	return true
 }
-func DownloadGosuMemory(filepath string) bool {
-	out, err := os.Create("./deps/gosumemory.zip")
+func DownloadTosu(filepath string) bool {
+	out, err := os.Create("./deps/tosu.zip")
 	if err != nil {
-		fmt.Println("[!!] Error occurred when creating gosumemory.zip")
+		fmt.Println("[!!] Error occurred when creating tosu.zip")
 		return false
 	}
 	defer out.Close()
 	resp, err := http.Get(filepath)
 	if err != nil {
-		fmt.Println("[!!] Error occurred when downloading GosuMemory.")
+		fmt.Println("[!!] Error occurred when downloading tosu.")
 		return false
 	}
 	defer resp.Body.Close()
 	io.Copy(out, resp.Body)
 
-	Unzip("./deps/gosumemory.zip", "./deps/")
-	// removeerr := os.Remove("./deps/gosumemory.zip")
+	Unzip("./deps/tosu.zip", "./deps/")
+	// removeerr := os.Remove("./deps/tosu.zip")
 	// if removeerr != nil {
-	// 	fmt.Println("[!!] Error occurred when deleting gosumemory.zip: ", removeerr)
+	// 	fmt.Println("[!!] Error occurred when deleting tosu.zip: ", removeerr)
 	// }
 	fmt.Printf("[+] Update completed.\n")
 	return true

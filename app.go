@@ -10,55 +10,55 @@ import (
 	"os/exec"
 	"time"
 
-	utils "github.com/Nat3z/osudeafen/utils"
+	utils "github.com/daftuyda/osuautodeafen/utils"
 	"github.com/gorilla/websocket"
 	"github.com/micmonay/keybd_event"
 )
 
-type ComboGosu struct {
+type ComboTosu struct {
 	Current float64 `json:"current"`
 	Max     float64 `json:"max"`
 }
 
-type BeatmapStatsGosu struct {
+type BeatmapStatsTosu struct {
 	MaxCombo float64 `json:"maxcombo"`
 }
-type BeatmapGosu struct {
-	Stats BeatmapStatsGosu `json:"stats"`
+type BeatmapTosu struct {
+	Stats BeatmapStatsTosu `json:"stats"`
 	ID    int              `json:"id"`
-	Time  TimeGosu         `json:"time"`
+	Time  TimeTosu         `json:"time"`
 }
 
-type TimeGosu struct {
+type TimeTosu struct {
 	Current  float32 `json:"current"`
 	Full     float32 `json:"full"`
 	Mp3      float32 `json:"mp3"`
 	FirstObj float32 `json:"firstObj"`
 }
-type MenuGosu struct {
-	BM    BeatmapGosu `json:"bm"`
+type MenuTosu struct {
+	BM    BeatmapTosu `json:"bm"`
 	State int         `json:"state"`
 }
 
-type GameplayHitsGosu struct {
+type GameplayHitsTosu struct {
 	Misses      float64 `json:"0"`
 	Meh         float64 `json:"50"`
 	Okay        float64 `json:"100"`
 	Great       float64 `json:"300"`
 	SliderBreak float64 `json:"sliderBreaks"`
 }
-type GameplayGosu struct {
+type GameplayTosu struct {
 	Name     string           `json:"name"`
 	GameMode int              `json:"gamemode"`
 	Score    float64          `json:"score"`
-	Combo    ComboGosu        `json:"combo"`
+	Combo    ComboTosu        `json:"combo"`
 	Accuracy float64          `json:"accuracy"`
-	Hits     GameplayHitsGosu `json:"hits"`
+	Hits     GameplayHitsTosu `json:"hits"`
 }
 
-type GoSuMemory struct {
-	Gameplay GameplayGosu `json:"gameplay"`
-	Menu     MenuGosu     `json:"menu"`
+type TosuMemory struct {
+	Gameplay GameplayTosu `json:"gameplay"`
+	Menu     MenuTosu     `json:"menu"`
 	Error    string       `json:"error"`
 }
 
@@ -118,7 +118,7 @@ var timesincelastws int64 = 0
 func main() {
 	fmt.Printf("[#] Checking for Updates...\n")
 	utils.CheckVersion()
-	utils.CheckVersionGosu()
+	utils.CheckVersionTosu()
 	var config = loadConfig()
 
 	if unloadedConfig {
@@ -129,18 +129,18 @@ func main() {
 	// check if the argument "--open" is passed, and if so, run the program.
 	if len(os.Args) > 1 {
 		if os.Args[1] == "--open" {
-			var porgram = os.Args[2]
-			fmt.Printf("[#] Opening %s... \n", porgram)
+			var program = os.Args[2]
+			fmt.Printf("[#] Opening %s... \n", program)
 			// run program async
-			go exec.Command(porgram).Run()
+			go exec.Command(program).Run()
 			time.Sleep(4 * time.Second)
 		}
 	}
 
-	// if start gosumemory automatically is on, then start process
-	cmnd := exec.Command("./deps/gosumemory.exe")
-	if config.General.StartGosuMemoryAutomatically {
-		fmt.Printf("[#] Starting GosuMemory... \n")
+	// if start tosu automatically is on, then start process
+	cmnd := exec.Command("./deps/tosu.exe")
+	if config.General.StartTosuMemoryAutomatically {
+		fmt.Printf("[#] Starting TosuMemory... \n")
 		cmnd.Start()
 		time.Sleep(4 * time.Second)
 	}
@@ -159,10 +159,10 @@ func main() {
 	ws, _, err := websocket.DefaultDialer.Dial(urlParsed.String(), nil)
 
 	if err != nil {
-		fmt.Println("[!!] Error when connecting to GosuMemory. Please make sure that GosuMemory is open and is connected to osu!")
+		fmt.Println("[!!] Error when connecting to TosuMemory. Please make sure that TosuMemory is open and is connected to osu!")
 		return
 	}
-	fmt.Println("[!] Connected to GosuMemory. Make sure that it stays on when playing osu!")
+	fmt.Println("[!] Connected to TosuMemory. Make sure that it stays on when playing osu!")
 
 	fmt.Println("[!] Playing as", config.General.Name)
 
@@ -189,26 +189,26 @@ func main() {
 			fmt.Println("[!!] Error reading: ", err)
 			break
 		}
-		var gosuResponse GoSuMemory
-		jsonerr := json.Unmarshal(message, &gosuResponse)
+		var tosuResponse TosuMemory
+		jsonerr := json.Unmarshal(message, &tosuResponse)
 		if jsonerr != nil {
 			fmt.Println("[!!] ", jsonerr)
 		} else {
 
 			timesincelastws = time.Now().Unix()
 
-			if gosuResponse.Gameplay.Name == config.General.Name && inbeatmap {
+			if tosuResponse.Gameplay.Name == config.General.Name && inbeatmap {
 
-				if gosuResponse.Menu.BM.Time.Current > 1 && (recentlyjoined || alreadyDetectedRestart) {
+				if tosuResponse.Menu.BM.Time.Current > 1 && (recentlyjoined || alreadyDetectedRestart) {
 					recentlyjoined = false
 					alreadyDetectedRestart = false
 				}
 
-				if gosuResponse.Gameplay.Hits.Misses-misses > 0 || gosuResponse.Gameplay.Hits.SliderBreak+gosuResponse.Gameplay.Hits.Misses != misses {
-					fmt.Println("| Missed, Broke, or lost combo. Incrementing miss count.")
-					misses = gosuResponse.Gameplay.Hits.Misses
+				if tosuResponse.Gameplay.Hits.Misses-misses > 0 || tosuResponse.Gameplay.Hits.SliderBreak+tosuResponse.Gameplay.Hits.Misses != misses {
+					//fmt.Println("| Missed, Broke, or lost combo. Incrementing miss count.")
+					misses = tosuResponse.Gameplay.Hits.Misses
 					if config.Gameplay.CountSliderBreaksAsMiss {
-						misses += gosuResponse.Gameplay.Hits.SliderBreak
+						misses += tosuResponse.Gameplay.Hits.SliderBreak
 					}
 				}
 
@@ -217,28 +217,36 @@ func main() {
 					deafenOrUndeafen(kb, false)
 				}
 
-				if gosuResponse.Gameplay.Score == 0 && gosuResponse.Gameplay.Accuracy == 0 && gosuResponse.Gameplay.Combo.Current == 0 && !recentlyjoined && !alreadyDetectedRestart {
+				if tosuResponse.Gameplay.Score == 0 && tosuResponse.Gameplay.Accuracy == 0 && tosuResponse.Gameplay.Combo.Current == 0 && !recentlyjoined && !alreadyDetectedRestart {
 					fmt.Println("| Detected that the user has restarted map. Attempting to undeafen..")
 					misses = 0
 					alreadyDetectedRestart = true
 					deafenOrUndeafen(kb, false)
-				} else if math.Floor(gosuResponse.Menu.BM.Stats.MaxCombo*config.Gameplay.DeafenPercent) < gosuResponse.Gameplay.Combo.Current && !alreadyDeafened && inbeatmap && misses == 0 {
-					fmt.Println("| Reached max combo treshold for map. Now deafening..")
-					deafenOrUndeafen(kb, true)
+				} else if math.Floor(tosuResponse.Menu.BM.Stats.MaxCombo*config.Gameplay.DeafenPercent) < tosuResponse.Gameplay.Combo.Current && !alreadyDeafened && inbeatmap {
+					// Handle RequireFC logic
+					if config.Gameplay.RequireFC {
+						if misses == 0 {
+							fmt.Println("| Reached max combo threshold for map with FC. Now deafening..")
+							deafenOrUndeafen(kb, true)
+						}
+					} else {
+						fmt.Println("| Reached max combo threshold for map. Now deafening..")
+						deafenOrUndeafen(kb, true)
+					}
 				}
 			}
 
-			if gosuResponse.Menu.State == 2 && utils.State != 2 {
+			if tosuResponse.Menu.State == 2 && utils.State != 2 {
 				fmt.Println("[#] Detected Beatmap Join")
 				inbeatmap = true
 				recentlyjoined = true
-			} else if utils.State == 2 && gosuResponse.Menu.State != 2 && inbeatmap {
+			} else if utils.State == 2 && tosuResponse.Menu.State != 2 && inbeatmap {
 				fmt.Println("[#] Detected Beatmap Exit")
 				inbeatmap = false
 				misses = 0
 				deafenOrUndeafen(kb, false)
 			}
-			utils.State = gosuResponse.Menu.State
+			utils.State = tosuResponse.Menu.State
 		}
 	}
 	shutdown(*cmnd)

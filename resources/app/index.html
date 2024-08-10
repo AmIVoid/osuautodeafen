@@ -29,16 +29,22 @@
           </header>
 
           <div class="settinglist">
-            <section data-toggle data-var-attach="general:startgosumemory">
-              <h2>Start with GosuMemory</h2>
+            <section data-toggle data-var-attach="general:starttosu">
+              <h2>Start with tosu</h2>
   
-              <input type="checkbox" name="general:startgosumemory" checked />
+              <input type="checkbox" name="general:starttosu" checked />
             </section>
   
             <section data-toggle data-var-attach="gameplay:countsliderbreakmiss">
               <h2>Slider Breaks as Miss</h2>
   
               <input type="checkbox" name="gameplay:countsliderbreakmiss" />
+            </section>
+
+            <section data-toggle data-var-attach="gameplay:requirefc">
+              <h2>Require FC to Deafen</h2>
+  
+              <input type="checkbox" name="gameplay:requirefc" />
             </section>
   
             <section data-slider data-var-attach="gameplay:deafenpercent" data-convdecimal="%">
@@ -51,7 +57,7 @@
             <section data-slider data-var-attach="gameplay:undeafenmiss">
               <h2>Undeafen at Misses</h2>
   
-              <input type="range" data-suffix="x" max="10" min="1" value="1" name="gameplay:undeafenmiss" />
+              <input type="range" data-suffix="x" max="25" min="1" value="1" name="gameplay:undeafenmiss" />
               <label>1x</label>
             </section>
             

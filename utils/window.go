@@ -21,15 +21,16 @@ type Message struct {
 }
 
 type GeneralSettings struct {
-	Name                         string `json:"username"`
-	StartGosuMemoryAutomatically bool   `json:"startgosumemory"`
-	DeafenKey                    string `json:"deafenkey"`
+	Name                   string `json:"username"`
+	StartTosuAutomatically bool   `json:"starttosu"`
+	DeafenKey              string `json:"deafenkey"`
 }
 
 type GameplaySettings struct {
 	DeafenPercent           float64 `json:"deafenpercent"`
 	UndeafenAfterMisses     float64 `json:"undeafenmiss"`
 	CountSliderBreaksAsMiss bool    `json:"countsliderbreakmiss"`
+	RequireFC               bool    `json:"requirefc"`
 }
 type Settings struct {
 	Gameplay GameplaySettings `json:"gameplay"`
@@ -44,13 +45,13 @@ var State int = 0
 var WindowAlreadyOpened = false
 
 var resources = []string{
-	"https://raw.githubusercontent.com/Nat3z/osuautodeafen/master/resources/app/app.js",
-	"https://raw.githubusercontent.com/Nat3z/osuautodeafen/master/resources/app/index.html",
-	"https://raw.githubusercontent.com/Nat3z/osuautodeafen/master/resources/app/style.css",
-	"https://raw.githubusercontent.com/Nat3z/osuautodeafen/master/resources/app/slider.css",
-	"https://raw.githubusercontent.com/Nat3z/osuautodeafen/master/assets/logo-not-transparent.png",
-	"https://raw.githubusercontent.com/Nat3z/osuautodeafen/master/resources/app/version.txt",
-	"https://raw.githubusercontent.com/Nat3z/osuautodeafen/master/resources/app/osu.ico",
+	"https://raw.githubusercontent.com/daftuyda/osuautodeafen/master/resources/app/app.js",
+	"https://raw.githubusercontent.com/daftuyda/osuautodeafen/master/resources/app/index.html",
+	"https://raw.githubusercontent.com/daftuyda/osuautodeafen/master/resources/app/style.css",
+	"https://raw.githubusercontent.com/daftuyda/osuautodeafen/master/resources/app/slider.css",
+	"https://raw.githubusercontent.com/daftuyda/osuautodeafen/master/assets/logo-not-transparent.png",
+	"https://raw.githubusercontent.com/daftuyda/osuautodeafen/master/resources/app/version.txt",
+	"https://raw.githubusercontent.com/daftuyda/osuautodeafen/master/resources/app/osu.ico",
 }
 
 func DownloadResources() {
@@ -64,7 +65,7 @@ func DownloadResources() {
 	for _, resource := range resources {
 		resp, err := http.Get(resource)
 		if err != nil {
-			fmt.Println("[!!] Error occurred when downloading GosuMemory.")
+			fmt.Println("[!!] Error occurred when downloading resources.")
 			return
 		}
 
@@ -85,132 +86,94 @@ func DownloadResources() {
 	fmt.Println("[#] Finished downloading resources.")
 }
 
-func CreateWindow(settings Settings, isFirstLoad bool) {
-
-	if WindowAlreadyOpened {
-		return
-	}
-
-	// see if the ./resources/app/index.html file exists
-	_, err := os.Stat("./resources/app/index.html")
-	if os.IsNotExist(err) {
-		fmt.Println("[#] Preparing to download resources..")
-		// download the resources
-		DownloadResources()
-	}
-
-	// check if the file version.txt exists in resources/app
-	_, err = os.Stat("./resources/app/version.txt")
+func checkVersionAndDownloadResources() {
+	// Check if the version.txt file exists in resources/app
+	_, err := os.Stat("./resources/app/version.txt")
 	if os.IsNotExist(err) {
 		fmt.Println("[!!] Error occurred when checking version.")
 		return
 	}
-	// read the file
+	// Read the version file
 	versionFile, err := os.Open("./resources/app/version.txt")
 	if err != nil {
-		fmt.Println("[!!] Error occurred when checking version.")
+		fmt.Println("[!!] Error occurred when opening version file.")
 		return
 	}
+	defer versionFile.Close()
 
 	version, err := io.ReadAll(versionFile)
 	if err != nil {
-		fmt.Println("[!!] Error occurred when checking version.")
+		fmt.Println("[!!] Error occurred when reading version file.")
 		return
 	}
-	// check if the version is the same as the one online
-	resp, err := http.Get("https://raw.githubusercontent.com/Nat3z/osuautodeafen/future/resources/app/version.txt")
+
+	// Check if the version is the same as the one online
+	resp, err := http.Get("https://raw.githubusercontent.com/daftuyda/osuautodeafen/future/resources/app/version.txt")
 	if err != nil {
-		fmt.Println("[!!] Error occurred when checking version.")
+		fmt.Println("[!!] Error occurred when checking version online.")
 		return
 	}
 	defer resp.Body.Close()
 	bodyEncoded, _ := io.ReadAll(resp.Body)
+
 	if string(version) != string(bodyEncoded) {
 		fmt.Println("[#] New version available, downloading..")
-		// download the resources
 		DownloadResources()
 	}
-	var a, _ = astilectron.New(nil, astilectron.Options{
-		AppName:            "osuautodeafen",
-		AppIconDefaultPath: "./resources/icon.png",
-		VersionAstilectron: "0.33.0",
-		VersionElectron:    "4.0.1",
-	})
-	defer a.Close()
+}
 
-	// Start astilectron
-	a.Start()
-	// 220 width by default
-	var w, _ = a.NewWindow("./resources/app/index.html", &astilectron.WindowOptions{
-		Height:      astikit.IntPtr(205),
-		Width:       astikit.IntPtr(195),
-		AlwaysOnTop: astikit.BoolPtr(true),
-		Transparent: astikit.BoolPtr(true),
-		Frame:       astikit.BoolPtr(false),
-		Resizable:   astikit.BoolPtr(false),
-		X:           astikit.IntPtr(15),
-		Y:           astikit.IntPtr(100),
-	})
-	WindowAlreadyOpened = true
-	w.Create()
-	go func() {
-		var closed = false
-		for {
-			if State != 0 && !closed {
-				fmt.Println("[#] Closing Window..")
-				w.Close()
-				closed = true
-			} else if closed && State == 0 {
-				WindowAlreadyOpened = false
-				break
-			}
-		}
-	}()
-	var settingTypeName = "load"
+func handleMessages(w *astilectron.Window, settings Settings, isFirstLoad bool) {
+	// Prepare the initial message
+	settingTypeName := "load"
 	if isFirstLoad {
 		settingTypeName += "-FIRSTLOAD"
 	}
-	var message SettingAsMessage = SettingAsMessage{Type: settingTypeName, Value: settings}
-	loadsettingsout, _ := json.Marshal(message)
+	message := SettingAsMessage{Type: settingTypeName, Value: settings}
+	loadSettingsOut, _ := json.Marshal(message)
 
-	w.SendMessage(string(loadsettingsout), func(m *astilectron.EventMessage) {
-		// Unmarshal
+	// Send the initial settings message
+	w.SendMessage(string(loadSettingsOut), func(m *astilectron.EventMessage) {
 		var s string
 		m.Unmarshal(&s)
-
-		// Process message
 		fmt.Printf("[#] %s\n", s)
 	})
+
+	// Handle incoming messages
 	w.OnMessage(func(m *astilectron.EventMessage) (v interface{}) {
 		var s string
 		m.Unmarshal(&s)
 		var message SettingAsMessage
 		json.Unmarshal([]byte(s), &message)
-		if message.Type == "generate-shortcut" {
-			// ask the user for where the "osu!.exe" file is
-			// get the username of the user
-			var username = os.Getenv("USERNAME")
-			filedialog, diagerr := zenity.SelectFile(zenity.Title("Select osu!.exe"), zenity.FileFilters{
-				zenity.FileFilter{
-					Name: "osu!.exe",
+
+		switch message.Type {
+		case "generate-shortcut":
+			// Ask the user for the location of the "osu!.exe" file
+			username := os.Getenv("USERNAME")
+			fileDialog, diagErr := zenity.SelectFile(
+				zenity.Title("Select osu!.exe"),
+				zenity.FileFilters{
+					zenity.FileFilter{
+						Name: "osu!.exe",
+					},
 				},
-			}, zenity.Filename("C:\\"+username+"\\AppData\\Local\\osu!\\osu!.exe"))
-			if diagerr != nil {
+				zenity.Filename("C:\\"+username+"\\AppData\\Local\\osu!\\osu!.exe"),
+			)
+			if diagErr != nil {
 				fmt.Println("[!!] Error occurred when opening file dialog.")
 				return "ERROR"
 			}
-			// get the path of the file
-			var path = filedialog
-			// get the local path of this .exe file
+
+			// Get the path of the file
+			path := fileDialog
+
+			// Get the local path of this .exe file
 			ex, err := os.Executable()
 			if err != nil {
 				panic(err)
 			}
-
-			// get the path of the file (including the file name)
 			exPath := filepath.Dir(ex) + "\\" + filepath.Base(ex)
-			// create the shortcut
-			//
+
+			// Create the shortcut
 			generatedShortcut := shortcut.Shortcut{
 				ShortcutPath:     "C:\\Users\\" + username + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\osu! Auto Deafen.lnk",
 				Target:           exPath,
@@ -220,18 +183,109 @@ func CreateWindow(settings Settings, isFirstLoad bool) {
 			}
 			shortcut.Create(generatedShortcut)
 			return "SUCCESS"
+
+		case "saveclose":
+			// Close the window
+			fmt.Println("[#] Close request received, closing the window.")
+			w.Close()
 		}
+
+		// Save settings to config.json
 		remarshal, _ := json.Marshal(message.Value)
 		if message.Value.General.DeafenKey == "" {
 			message.Value.General.DeafenKey = "alt+d"
 		}
 
 		out, _ := os.Create("config.json")
-		out.Write(([]byte)(remarshal))
+		out.Write([]byte(remarshal))
 		out.Close()
 
 		return "SUCCESS"
 	})
+}
+
+func CreateWindow(settings Settings, isFirstLoad bool) {
+	if WindowAlreadyOpened {
+		fmt.Println("[#] Window already opened, skipping creation.")
+		return
+	}
+
+	// Check if resources are available
+	_, err := os.Stat("./resources/app/index.html")
+	if os.IsNotExist(err) {
+		fmt.Println("[#] Preparing to download resources..")
+		DownloadResources()
+	}
+
+	// Version check and download resources if necessary
+	checkVersionAndDownloadResources()
+
+	// Create new Astilectron instance
+	a, err := astilectron.New(nil, astilectron.Options{
+		AppName:            "osuautodeafen",
+		AppIconDefaultPath: "./resources/icon.png",
+		VersionAstilectron: "0.33.0",
+		VersionElectron:    "4.0.1",
+	})
+	if err != nil {
+		fmt.Println("[!!] Error occurred when creating Astilectron instance:", err)
+		return
+	}
+	defer a.Close()
+
+	// Start Astilectron
+	if err = a.Start(); err != nil {
+		fmt.Println("[!!] Error occurred when starting Astilectron:", err)
+		return
+	}
+
+	// Create window
+	w, err := a.NewWindow("./resources/app/index.html", &astilectron.WindowOptions{
+		Height:      astikit.IntPtr(205),
+		Width:       astikit.IntPtr(195),
+		AlwaysOnTop: astikit.BoolPtr(true),
+		Transparent: astikit.BoolPtr(true),
+		Frame:       astikit.BoolPtr(false),
+		Resizable:   astikit.BoolPtr(false),
+		X:           astikit.IntPtr(15),
+		Y:           astikit.IntPtr(100),
+	})
+	if err != nil {
+		fmt.Println("[!!] Error occurred when creating window:", err)
+		return
+	}
+	WindowAlreadyOpened = true
+
+	// Debug print: Window created
+	fmt.Println("[#] Window created successfully.")
+
+	// Create window
+	if err = w.Create(); err != nil {
+		fmt.Println("[!!] Error occurred when creating window:", err)
+		return
+	}
+
+	// Handle window close event using the "close" event name
+	w.On("close", func(e astilectron.Event) (deleteListener bool) {
+		fmt.Println("[#] Window close event triggered.")
+		WindowAlreadyOpened = false
+
+		// Debug before quitting
+		fmt.Println("[#] Calling a.Quit() to terminate the Electron process.")
+
+		// Quit Astilectron and clean up resources
+		if err := a.Quit(); err != nil {
+			fmt.Println("[!!] Error occurred when quitting Astilectron:", err)
+		} else {
+			fmt.Println("[#] Electron process terminated successfully.")
+		}
+
+		return true
+	})
+
+	// Handle messages between Go and Electron
+	handleMessages(w, settings, isFirstLoad)
+
 	// Blocking pattern
 	a.Wait()
 }

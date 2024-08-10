@@ -36,6 +36,7 @@ document.querySelector("form").addEventListener("submit", event => {
     if (m === "SUCCESS") window.close()
   })
 })
+
 document.querySelectorAll("input[type=range]").forEach(elem => {
   elem.addEventListener("input", () => {
     elem.parentElement.querySelector("label").textContent = elem.value + elem.getAttribute("data-suffix")
