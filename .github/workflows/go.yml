@@ -21,7 +21,13 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.19'
+          go-version: '1.22.6'
+
+      - name: Install winres
+        run: go install github.com/tc-hib/winres@latest
+
+      - name: Add Icons with winres
+        run: winres make --in icon.ico --out rsrc.syso
 
       - name: Build EXE
         run: go build -ldflags="-H windowsgui" -o osuautodeafen.exe .
