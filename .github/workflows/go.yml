@@ -23,9 +23,6 @@ jobs:
         with:
           go-version: '1.22.6'
 
-      - name: Install winres
-        run: go install github.com/tc-hib/winres@latest
-
       - name: Build EXE
         run: go build -ldflags="-H windowsgui" -o osuautodeafen.exe .
 
