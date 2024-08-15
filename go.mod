@@ -9,6 +9,7 @@ require (
 	github.com/jxeng/shortcut v1.0.2
 	github.com/micmonay/keybd_event v1.1.1
 	github.com/ncruces/zenity v0.10.10
+	github.com/tc-hib/winres v0.3.1
 )
 
 require (
