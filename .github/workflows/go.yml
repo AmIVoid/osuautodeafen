@@ -1,0 +1,56 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.19'
+
+      - name: Install go-winres
+        run: go install github.com/tc-hib/go-winres@latest
+
+      - name: Add Resources with go-winres
+        run: go-winres make
+
+      - name: Build EXE
+        run: go build -o osuautodeafen.exe .
+
+      - name: Upload Release Asset
+        uses: actions/upload-artifact@v3
+        with:
+          name: osuautodeafen
+          path: osuautodeafen.exe
+
+  release:
+    needs: build
+    runs-on: windows-latest
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: osuautodeafen
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: osuautodeafen.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}

@@ -10,6 +10,7 @@ require (
 	github.com/lxn/win v0.0.0-20210218163916-a377121e959e
 	github.com/micmonay/keybd_event v1.1.1
 	github.com/ncruces/zenity v0.10.10
+	github.com/tc-hib/winres v0.3.1
 )
 
 require (
