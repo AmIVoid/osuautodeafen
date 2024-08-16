@@ -46,6 +46,12 @@
   
               <input type="checkbox" name="gameplay:requirefc" />
             </section>
+
+            <section data-toggle data-var-attach="general:blackout">
+              <h2>Blackout Screens</h2>
+  
+              <input type="checkbox" name="general:blackout" />
+            </section>
   
             <section data-slider data-var-attach="gameplay:deafenpercent" data-convdecimal="%">
               <h2>Deafen Percent</h2>
@@ -57,7 +63,7 @@
             <section data-slider data-var-attach="gameplay:undeafenmiss">
               <h2>Undeafen at Misses</h2>
   
-              <input type="range" data-suffix="x" max="25" min="1" value="1" name="gameplay:undeafenmiss" />
+              <input type="range" data-suffix="x" max="25" min="0" value="0" name="gameplay:undeafenmiss" />
               <label>1x</label>
             </section>
             

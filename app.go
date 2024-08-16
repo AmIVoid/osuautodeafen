@@ -140,7 +140,7 @@ func main() {
 	// if start tosu automatically is on, then start process
 	cmnd := exec.Command("./deps/tosu.exe")
 	if config.General.StartTosuAutomatically {
-		fmt.Printf("[#] Starting TosuMemory... \n")
+		fmt.Printf("[#] Starting Tosu... \n")
 		cmnd.Start()
 		time.Sleep(4 * time.Second)
 	}
@@ -177,6 +177,9 @@ func main() {
 		for {
 			if time.Now().Unix()-timesincelastws > 1 {
 				fmt.Println("[!!] osu! has closed. Now stopping osu! Auto Deafen...")
+				if config.General.EnableScreenBlackout {
+					utils.RestoreScreens()
+				}
 				shutdown(*cmnd)
 				break
 			}
@@ -212,9 +215,13 @@ func main() {
 					}
 				}
 
-				if misses >= config.Gameplay.UndeafenAfterMisses && alreadyDeafened {
-					fmt.Printf("| Missed too many times (%sx) for undeafen. Now undeafening..\n", fmt.Sprint(config.Gameplay.UndeafenAfterMisses))
-					deafenOrUndeafen(kb, false)
+				if config.Gameplay.UndeafenAfterMisses > 0 {
+					if misses >= config.Gameplay.UndeafenAfterMisses && alreadyDeafened {
+						fmt.Printf("| Missed too many times (%sx) for undeafen. Now undeafening..\n", fmt.Sprint(config.Gameplay.UndeafenAfterMisses))
+						deafenOrUndeafen(kb, false)
+					}
+				} else if alreadyDeafened {
+					// fmt.Println("| Undeafen condition skipped due to UndeafenAfterMisses being set to 0.")
 				}
 
 				if tosuResponse.Gameplay.Score == 0 && tosuResponse.Gameplay.Accuracy == 0 && tosuResponse.Gameplay.Combo.Current == 0 && !recentlyjoined && !alreadyDetectedRestart {
@@ -240,11 +247,17 @@ func main() {
 				fmt.Println("[#] Detected Beatmap Join")
 				inbeatmap = true
 				recentlyjoined = true
+				if config.General.EnableScreenBlackout {
+					utils.BlackoutScreens()
+				}
 			} else if utils.State == 2 && tosuResponse.Menu.State != 2 && inbeatmap {
 				fmt.Println("[#] Detected Beatmap Exit")
 				inbeatmap = false
 				misses = 0
 				deafenOrUndeafen(kb, false)
+				if config.General.EnableScreenBlackout {
+					utils.RestoreScreens()
+				}
 			}
 			utils.State = tosuResponse.Menu.State
 		}

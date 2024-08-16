@@ -24,6 +24,7 @@ type GeneralSettings struct {
 	Name                   string `json:"username"`
 	StartTosuAutomatically bool   `json:"starttosu"`
 	DeafenKey              string `json:"deafenkey"`
+	EnableScreenBlackout   bool   `json:"blackout"`
 }
 
 type GameplaySettings struct {
@@ -241,7 +242,7 @@ func CreateWindow(settings Settings, isFirstLoad bool) {
 
 	// Create window
 	w, err := a.NewWindow("./resources/app/index.html", &astilectron.WindowOptions{
-		Height:      astikit.IntPtr(225),
+		Height:      astikit.IntPtr(245),
 		Width:       astikit.IntPtr(195),
 		AlwaysOnTop: astikit.BoolPtr(true),
 		Transparent: astikit.BoolPtr(true),

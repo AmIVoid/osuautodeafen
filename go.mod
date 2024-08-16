@@ -7,6 +7,7 @@ require (
 	github.com/asticode/go-astilectron v0.29.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/jxeng/shortcut v1.0.2
+	github.com/lxn/win v0.0.0-20210218163916-a377121e959e
 	github.com/micmonay/keybd_event v1.1.1
 	github.com/ncruces/zenity v0.10.10
 )
