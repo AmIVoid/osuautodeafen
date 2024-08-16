@@ -21,16 +21,16 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.22.6'
+          go-version: '1.19'
 
-      - name: Install winres
-        run: go install github.com/tc-hib/winres@latest
+      - name: Install go-winres
+        run: go install github.com/tc-hib/go-winres@latest
 
-      - name: Add Icons with winres
-        run: winres make --in icon.ico --out rsrc.syso
+      - name: Add Resources with go-winres
+        run: go-winres make
 
       - name: Build EXE
-        run: go build -ldflags="-H windowsgui" -o osuautodeafen.exe .
+        run: go build -o osuautodeafen.exe .
 
       - name: Upload Release Asset
         uses: actions/upload-artifact@v3
