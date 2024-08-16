@@ -1,5 +1,7 @@
 ![banner](./assets/osuautodeafen-banner.png)
 
+[![Build and Release](https://github.com/daftuyda/osuautodeafen/actions/workflows/go.yml/badge.svg)](https://github.com/daftuyda/osuautodeafen/actions/workflows/go.yml)
+
 Powered by the popular tool, [tosu](https://github.com/KotRikD/tosu), osu! Auto Deafen gives users an easy-to-use system for auto deafening you on Discord whenever you're about to FC a map.
 
 # Installation Steps
